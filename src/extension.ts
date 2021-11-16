@@ -21,7 +21,6 @@ interface IConfig {
 class PythonAutoTest {
 	private _config: IConfig;
 	private _isEnabled: boolean;
-	private _context: vscode.ExtensionContext;
 	private _outputChannel: vscode.OutputChannel;
 	private _statusBarIcon: vscode.StatusBarItem;
 
@@ -36,7 +35,6 @@ class PythonAutoTest {
 		this._statusBarIcon.command = enableDisableCommandId;
 		console.log(`config value enabled: ${this._config.enabled}, isEnabled: ${this._isEnabled}`);
 		this._isEnabled ? this._enable() : this._disable();
-		this._context = context;
 		context.subscriptions.push(this._statusBarIcon);
 		this._outputChannel = vscode.window.createOutputChannel('Python Autotest');
 	}
@@ -79,17 +77,18 @@ class PythonAutoTest {
 			return;
 		}
 		const workspaceFolderPath = workspaceFolderUri.uri.fsPath;
+		this._statusBarIcon.text = "$(loading~spin) Tests";
 		exec(this._config.testCommand, { cwd: workspaceFolderPath }, (error, stdout, stderr) => {
 			this._outputChannel.append(stdout);
 			this._outputChannel.append(stderr);
 			if (error) {
 				this._outputChannel.append(error.message);
-				this._statusBarIcon.text = 'Autotest Failed';
+				this._statusBarIcon.text = '$(testing-failed-icon) Tests';
 				this._statusBarIcon.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
 				this._statusBarIcon.show();
 			}
 			else {
-				this._statusBarIcon.text = 'Autotest Passed';
+				this._statusBarIcon.text = '$(testing-passed-icon) Tests';
 				this._statusBarIcon.backgroundColor = new vscode.ThemeColor('statusBarItem.background');
 				this._statusBarIcon.show();
 			}
