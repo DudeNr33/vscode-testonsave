@@ -51,47 +51,44 @@ class PythonAutoTest {
 		this._statusUpdate('Autotest Disabled');
 	}
 
-	private _statusUpdate(message: string, isError: boolean = false) {
+	private _statusUpdate(message: string) {
 		this._statusBarIcon.text = message;
-		if (isError) {
-			this._statusBarIcon.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
-		}
-		else {
-			this._statusBarIcon.backgroundColor = new vscode.ThemeColor('statusBarItem.background');
-		}
 		this._statusBarIcon.show();
 	}
 
-	public runTests(document: vscode.TextDocument) {
-		if (document.languageId !== 'python') {
-			console.log("Not a python file - nothing to do.");
-			return;
-		}
-		if (!this._isEnabled) {
-			console.log("Autotest is disabled - nothing to do.");
-			return;
-		}
+	private _isRelevantFile(document: vscode.TextDocument): boolean {
+		return document.languageId === 'python';
+	}
+
+	private _getWorkingDirectory(document: vscode.TextDocument): string | undefined {
 		const workspaceFolderUri = vscode.workspace.getWorkspaceFolder(document.uri);
 		if (!workspaceFolderUri) {
 			console.error("workspaceFolderUri is null");
+			return undefined;
+		}
+		return workspaceFolderUri.uri.fsPath;
+	}
+
+	public runTests(document: vscode.TextDocument) {
+		if (!this._isRelevantFile(document) || !this._isEnabled) {
 			return;
 		}
-		const workspaceFolderPath = workspaceFolderUri.uri.fsPath;
-		this._statusBarIcon.text = "$(loading~spin) Tests";
+		const workspaceFolderPath = this._getWorkingDirectory(document);
+		if (workspaceFolderPath === undefined) {
+			return;
+		}
+		this._statusUpdate("$(loading~spin) Tests");
 		exec(this._config.testCommand, { cwd: workspaceFolderPath }, (error, stdout, stderr) => {
 			this._outputChannel.append(stdout);
 			this._outputChannel.append(stderr);
 			if (error) {
 				this._outputChannel.append(error.message);
-				this._statusBarIcon.text = '$(testing-failed-icon) Tests';
-				this._statusBarIcon.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
-				this._statusBarIcon.show();
+				this._statusUpdate('$(testing-failed-icon) Tests');
 			}
 			else {
-				this._statusBarIcon.text = '$(testing-passed-icon) Tests';
-				this._statusBarIcon.backgroundColor = new vscode.ThemeColor('statusBarItem.background');
-				this._statusBarIcon.show();
+				this._statusUpdate('$(testing-passed-icon) Tests');
 			}
+			this._statusBarIcon.show();
 		});
 	}
 }
