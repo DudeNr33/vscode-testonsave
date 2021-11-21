@@ -1,20 +1,19 @@
-# python-autotest README
+# Test On Save
 
-This is the README for your extension "python-autotest". After writing up a brief description, we recommend including the following sections.
+Tired of switching to the test explorer to run test while working TDD style?
+This extension will automatically run them for you when you save a file!
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+* Language independent - command to run tests can be set through ``settings.json``
+* Can be enabled/disabled through ``settings.json`` or by clicking the status bar icon
+* Runs discretely in the background - no annoying popups, only red or green status bar icon displaying last test result
 
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![Demo](images/demo.gif)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Test On Save runs on VScode 1.62.0 and above.
 
 ## Extension Settings
 
