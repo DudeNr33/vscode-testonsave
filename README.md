@@ -9,7 +9,9 @@ This extension will automatically run them for you when you save a file!
 * Can be enabled/disabled through ``settings.json`` or by clicking the status bar icon
 * Runs discretely in the background - no annoying popups, only red or green status bar icon displaying last test result
 
-![Demo](images/demo.gif)
+
+## Demo
+<img src="images/demo.gif" width="600" alt="Demo" />
 
 ## Requirements
 
@@ -17,53 +19,26 @@ Test On Save runs on VScode 1.62.0 and above.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+* `testOnSave.enabled`: Enable/disable this extension
+* `testOnSave.testCommand`: Command to run tests. Any non-zero exit code is treated as failing tests.
+* `testOnSave.languageId`: Only trigger tests when a file of this language is saved. Set to "any" to always run tests after saving.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+The following open TODOs and known issues exists:
+
+* allow specification of multiple test commands for different language ids
+* use the native testing API of VScode to run tests and get test results, as soon as ``vscode.tests.testResults`` is available outside the [proposed API](https://code.visualstudio.com/api/advanced-topics/using-proposed-api)
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
+Initial release of Test On Save.
 
-### 1.0.1
 
-Fixed issue #.
+## Attributions
 
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Icons made by <a href="https://www.flaticon.com/authors/maxim-basinski-premium" title="Maxim Basinski Premium">Maxim Basinski Premium</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>

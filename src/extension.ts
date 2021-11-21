@@ -10,12 +10,6 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 }
 
-// general TODOS:
-// DONE: listen for configuration changes
-// TODO: different test commands for different languages / file types
-// DONE: file pattern matching - might be combined with different test commands for different languages
-// TODO: find out precedence of settings (settings.json vs. Settings window)
-
 class TestOnSave {
 	private _testCommand: any = null;
 	private _isEnabled: any = false;
