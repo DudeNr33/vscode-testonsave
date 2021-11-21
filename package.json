@@ -28,6 +28,11 @@
 						"type": "string",
 						"description": "Command to execute tests",
 						"default": null
+					},
+					"testOnSave.languageId": {
+						"type": "string",
+						"description": "Only files with this language id trigger the test command. Use 'any' to trigger independent of the language.",
+						"default": "any"
 					}
 				}
 			}

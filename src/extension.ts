@@ -13,20 +13,23 @@ export function activate(context: vscode.ExtensionContext) {
 // general TODOS:
 // DONE: listen for configuration changes
 // TODO: different test commands for different languages / file types
-// TODO: file pattern matching - might be combined with different test commands for different languages
+// DONE: file pattern matching - might be combined with different test commands for different languages
 // TODO: find out precedence of settings (settings.json vs. Settings window)
 
 class TestOnSave {
 	private _testCommand: any = null;
 	private _isEnabled: any = false;
+	private _languageId: any = "any";
 	private _outputChannel: vscode.OutputChannel;
 	private _statusBarIcon: vscode.StatusBarItem;
 
 	constructor(context: vscode.ExtensionContext) {
+		// Create a private command to toggle between enabled/disabled. This command is not accessible through the command palette.
 		const enableDisableCommandId = 'testOnSave.enableDisable';
 		context.subscriptions.push(vscode.commands.registerCommand(enableDisableCommandId, () => {
 			this._isEnabled ? this._disable() : this._enable();
 		}));
+		// The status bar item shows the last test result (if TestOnSave is enabled) and can be clicked to toggle between enabled/disabled.
 		this._statusBarIcon = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
 		this._statusBarIcon.command = enableDisableCommandId;
 		context.subscriptions.push(this._statusBarIcon);
@@ -38,6 +41,8 @@ class TestOnSave {
 	private _readConfiguration() {
 		this._isEnabled = vscode.workspace.getConfiguration('testOnSave').get('enabled');
 		this._testCommand = vscode.workspace.getConfiguration('testOnSave').get('testCommand');
+		let languageId = <String>vscode.workspace.getConfiguration('testOnSave').get('languageId');
+		this._languageId = languageId.trim();
 		this._isEnabled ? this._enable() : this._disable();
 	}
 
@@ -59,7 +64,7 @@ class TestOnSave {
 	}
 
 	private _isRelevantFile(document: vscode.TextDocument): boolean {
-		return document.languageId === 'python';
+		return this._languageId === "any" || document.languageId === this._languageId;
 	}
 
 	private _getWorkingDirectory(document: vscode.TextDocument): string | undefined {
