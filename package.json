@@ -3,6 +3,7 @@
 	"name": "testonsave",
 	"displayName": "Test On Save",
 	"description": "Run tests automatically on save.",
+	"license": "SEE LICENSE IN LICENSE",
 	"icon": "images/logo.png",
 	"version": "1.0.0",
 	"engines": {
