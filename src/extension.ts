@@ -3,50 +3,47 @@ import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	console.log('"python-autotest" is now active!');
-	var extension = new PythonAutoTest(context);
+	var extension = new TestOnSave(context);
 
 	vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
 		extension.runTests(document);
 	});
 }
 
+// general TODOS:
+// TODO: listen for configuration changes
+// TODO: different test commands for different languages / file types
+// TODO: file pattern matching - might be combined with different test commands for different languages
+// TODO: find out precedence of settings (settings.json vs. Settings window)
 
-interface IConfig {
-	enabled: boolean;
-	testCommand: string;
-}
-
-
-class PythonAutoTest {
-	private _config: IConfig;
-	private _isEnabled: boolean;
+class TestOnSave {
+	private _testCommand: any = null;
+	private _isEnabled: any = false;
 	private _outputChannel: vscode.OutputChannel;
 	private _statusBarIcon: vscode.StatusBarItem;
 
 	constructor(context: vscode.ExtensionContext) {
-		this._config = <IConfig><any>vscode.workspace.getConfiguration('afinkler.pythonAutotest');  // TODO: error handling and typing
-		this._isEnabled = this._config.enabled;
-		const enableDisableCommandId = 'afinkler.pythonAutotest.enableDisable';
+		this._isEnabled = vscode.workspace.getConfiguration('testOnSave').get('enabled');
+		const enableDisableCommandId = 'afinkler.testOnSave.enableDisable';
 		context.subscriptions.push(vscode.commands.registerCommand(enableDisableCommandId, () => {
 			this._isEnabled ? this._disable() : this._enable();
 		}));
 		this._statusBarIcon = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
 		this._statusBarIcon.command = enableDisableCommandId;
-		console.log(`config value enabled: ${this._config.enabled}, isEnabled: ${this._isEnabled}`);
 		this._isEnabled ? this._enable() : this._disable();
 		context.subscriptions.push(this._statusBarIcon);
-		this._outputChannel = vscode.window.createOutputChannel('Python Autotest');
+		this._outputChannel = vscode.window.createOutputChannel('Test On Save');
+		this._testCommand = vscode.workspace.getConfiguration('testOnSave').get('testCommand');
 	}
 
 	private _enable() {
-		console.log("Enabling Python Autotest");
+		console.log("Enabling Test On Save");
 		this._isEnabled = true;
 		this._statusUpdate('Autotest Enabled');
 	}
 
 	private _disable() {
-		console.log("Disabling Python Autotest");
+		console.log("Disabling Test On Save");
 		this._isEnabled = false;
 		this._statusUpdate('Autotest Disabled');
 	}
@@ -78,7 +75,8 @@ class PythonAutoTest {
 			return;
 		}
 		this._statusUpdate("$(loading~spin) Tests");
-		exec(this._config.testCommand, { cwd: workspaceFolderPath }, (error, stdout, stderr) => {
+		// TODO: Show error popup if test command is not defined
+		exec(this._testCommand, { cwd: workspaceFolderPath }, (error, stdout, stderr) => {
 			this._outputChannel.append(stdout);
 			this._outputChannel.append(stderr);
 			if (error) {

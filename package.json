@@ -14,7 +14,25 @@
 		"onStartupFinished"
 	],
 	"main": "./out/extension.js",
-	"contributes": {},
+	"contributes": {
+		"configuration": [
+			{
+				"title": "Test On Save",
+				"properties": {
+					"testOnSave.enabled": {
+						"type": "boolean",
+						"description": "Run tests automatically when saving a file",
+						"default": false
+					},
+					"testOnSave.testCommand": {
+						"type": "string",
+						"description": "Command to execute tests",
+						"default": null
+					}
+				}
+			}
+		]
+	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
