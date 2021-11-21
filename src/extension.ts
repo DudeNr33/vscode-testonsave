@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // general TODOS:
-// TODO: listen for configuration changes
+// DONE: listen for configuration changes
 // TODO: different test commands for different languages / file types
 // TODO: file pattern matching - might be combined with different test commands for different languages
 // TODO: find out precedence of settings (settings.json vs. Settings window)
@@ -23,17 +23,22 @@ class TestOnSave {
 	private _statusBarIcon: vscode.StatusBarItem;
 
 	constructor(context: vscode.ExtensionContext) {
-		this._isEnabled = vscode.workspace.getConfiguration('testOnSave').get('enabled');
-		const enableDisableCommandId = 'afinkler.testOnSave.enableDisable';
+		const enableDisableCommandId = 'testOnSave.enableDisable';
 		context.subscriptions.push(vscode.commands.registerCommand(enableDisableCommandId, () => {
 			this._isEnabled ? this._disable() : this._enable();
 		}));
 		this._statusBarIcon = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
 		this._statusBarIcon.command = enableDisableCommandId;
-		this._isEnabled ? this._enable() : this._disable();
 		context.subscriptions.push(this._statusBarIcon);
+		context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => this._readConfiguration()));
 		this._outputChannel = vscode.window.createOutputChannel('Test On Save');
+		this._readConfiguration();
+	}
+
+	private _readConfiguration() {
+		this._isEnabled = vscode.workspace.getConfiguration('testOnSave').get('enabled');
 		this._testCommand = vscode.workspace.getConfiguration('testOnSave').get('testCommand');
+		this._isEnabled ? this._enable() : this._disable();
 	}
 
 	private _enable() {
