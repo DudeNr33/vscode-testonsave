@@ -75,12 +75,15 @@ class TestOnSave {
 		if (!this._isRelevantFile(document) || !this._isEnabled) {
 			return;
 		}
+		if (this._testCommand === null || this._testCommand.trim() === "") {
+			vscode.window.showErrorMessage('No test command configured');
+			return;
+		}
 		const workspaceFolderPath = this._getWorkingDirectory(document);
 		if (workspaceFolderPath === undefined) {
 			return;
 		}
 		this._statusUpdate("$(loading~spin) Tests");
-		// TODO: Show error popup if test command is not defined
 		exec(this._testCommand, { cwd: workspaceFolderPath }, (error, stdout, stderr) => {
 			this._outputChannel.append(stdout);
 			this._outputChannel.append(stderr);
