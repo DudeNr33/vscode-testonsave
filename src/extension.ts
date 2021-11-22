@@ -83,17 +83,16 @@ class TestOnSave {
 			return;
 		}
 		this._statusUpdate("$(loading~spin) Tests");
-		exec(this._testCommand, { cwd: workspaceFolderPath }, (error, stdout, stderr) => {
-			this._outputChannel.append(stdout);
-			this._outputChannel.append(stderr);
-			if (error) {
-				this._outputChannel.append(error.message);
-				this._statusUpdate('$(testing-failed-icon) Tests');
-			}
-			else {
-				this._statusUpdate('$(testing-passed-icon) Tests');
-			}
-			this._statusBarIcon.show();
+		let child = exec(this._testCommand, { cwd: workspaceFolderPath });
+		if (child.stdout && child.stderr) {
+			child.stdout.on('data', data => { this._outputChannel.append(data); });
+			child.stderr.on('data', data => { this._outputChannel.append(data); });
+		}
+		child.on('error', e => {
+			this._outputChannel.append(e.message);
+		});
+		child.on('exit', code => {
+			code === 0 ? this._statusUpdate('$(testing-passed-icon) Tests') : this._statusUpdate('$(testing-failed-icon) Tests');
 		});
 	}
 }
