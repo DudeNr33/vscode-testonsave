@@ -34,10 +34,7 @@ The following open TODOs and known issues exists:
 
 ## Release Notes
 
-### 1.0.0
-
-Initial release of Test On Save.
-
+See the [changelog](https://marketplace.visualstudio.com/items/andifin.testonsave/changelog) for details.
 
 ## Attributions
 
