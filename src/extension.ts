@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	var extension = new TestOnSave(context);
+	const extension = new TestOnSave(context);
 
 	vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
 		extension.runTests(document);
@@ -14,6 +14,7 @@ class TestOnSave {
 	private _testCommand: any = null;
 	private _isEnabled: any = false;
 	private _languageId: any = "any";
+	private _running: boolean = false;
 	private _outputChannel: vscode.OutputChannel;
 	private _statusBarIcon: vscode.StatusBarItem;
 
@@ -71,10 +72,12 @@ class TestOnSave {
 	}
 
 	public runTests(document: vscode.TextDocument) {
-		if (!this._isRelevantFile(document) || !this._isEnabled) {
+		if (!this._isEnabled || this._running || !this._isRelevantFile(document)) {
+			// TestOnSave is disabled, or we are already running tests, or the file is not relevant.
 			return;
 		}
 		if (this._testCommand === null || this._testCommand.trim() === "") {
+			// No test command configured or empty.
 			vscode.window.showErrorMessage('No test command configured');
 			return;
 		}
@@ -82,18 +85,20 @@ class TestOnSave {
 		if (workspaceFolderPath === undefined) {
 			return;
 		}
+		this._outputChannel.clear();
+		this._running = true;
 		this._statusUpdate("$(loading~spin) Tests");
-		exec(this._testCommand, { cwd: workspaceFolderPath }, (error, stdout, stderr) => {
-			this._outputChannel.append(stdout);
-			this._outputChannel.append(stderr);
-			if (error) {
-				this._outputChannel.append(error.message);
-				this._statusUpdate('$(testing-failed-icon) Tests');
-			}
-			else {
-				this._statusUpdate('$(testing-passed-icon) Tests');
-			}
-			this._statusBarIcon.show();
+		let child = exec(this._testCommand, { cwd: workspaceFolderPath });
+		if (child.stdout && child.stderr) {
+			child.stdout.on('data', data => { this._outputChannel.append(data); });
+			child.stderr.on('data', data => { this._outputChannel.append(data); });
+		}
+		child.on('error', e => {
+			this._outputChannel.append(e.message);
+		});
+		child.on('exit', code => {
+			code === 0 ? this._statusUpdate('$(testing-passed-icon) Tests') : this._statusUpdate('$(testing-failed-icon) Tests');
+			this._running = false;
 		});
 	}
 }
