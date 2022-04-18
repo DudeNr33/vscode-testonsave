@@ -14,6 +14,9 @@ class TestOnSave {
 	private _testCommand: any = null;
 	private _isEnabled: any = false;
 	private _languageId: any = "any";
+	private _exitCodePass: Set<Number> = new Set<Number>();
+	private _exitCodeFail: Set<Number> = new Set<Number>();
+	private _exitCodeError: Set<Number> = new Set<Number>();
 	private _running: boolean = false;
 	private _outputChannel: vscode.OutputChannel;
 	private _statusBarIcon: vscode.StatusBarItem;
@@ -39,6 +42,39 @@ class TestOnSave {
 		let languageId = <String>vscode.workspace.getConfiguration('testOnSave').get('languageId');
 		this._languageId = languageId.trim();
 		this._isEnabled ? this._enable() : this._disable();
+		let exitCodePassString = <String>vscode.workspace.getConfiguration('testOnSave').get('exitCodePass');
+		this._exitCodePass = this._parseExitCodes(exitCodePassString);
+		let exitCodeFailString = <String>vscode.workspace.getConfiguration('testOnSave').get('exitCodeFail');
+		this._exitCodeFail = this._parseExitCodes(exitCodeFailString);
+		let exitCodeErrorString = <String>vscode.workspace.getConfiguration('testOnSave').get('exitCodeError');
+		this._exitCodeError = this._parseExitCodes(exitCodeErrorString);
+		console.log(this._exitCodePass);
+		console.log(this._exitCodeFail);
+		console.log(this._exitCodeError);
+	}
+
+	/**
+	 * Create a set of all possible exit codes as defined by the exitCodes string.
+	 * @param exitCodes - A string representing ranges of exit codes separated by commas.
+	 * 					  For example, "0,1,2-4,6-9" would match exit codes 0, 1, 2, 3, 4, 6, 7, 8, 9.	
+	 */
+	private _parseExitCodes(exitCodes: String): Set<Number> {
+		const exitCodesSet = new Set<Number>();
+		if (exitCodes === null || exitCodes === undefined || exitCodes.trim() === "") {
+			return exitCodesSet;
+		}
+		const exitCodesArray = exitCodes.split(',');
+		for (let i = 0; i < exitCodesArray.length; i++) {
+			const exitCodeRange = exitCodesArray[i].trim().split('-');
+			if (exitCodeRange.length === 1) {
+				exitCodesSet.add(parseInt(exitCodeRange[0]));
+			} else if (exitCodeRange.length === 2) {
+				for (let j = parseInt(exitCodeRange[0]); j <= parseInt(exitCodeRange[1]); j++) {
+					exitCodesSet.add(j);
+				}
+			}
+		}
+		return exitCodesSet;
 	}
 
 	private _enable() {
@@ -71,6 +107,18 @@ class TestOnSave {
 		return workspaceFolderUri.uri.fsPath;
 	}
 
+	private _getStatusIconForExitCode(exitCode: Number): string {
+		if (this._exitCodePass.has(exitCode)) {
+			return '$(testing-passed-icon)';
+		} else if (this._exitCodeFail.has(exitCode)) {
+			return '$(testing-failed-icon)';
+		} else if (this._exitCodeError.has(exitCode)) {
+			return '$(testing-error-icon)';
+		} else {
+			return '$(question)';
+		}
+	}
+
 	public runTests(document: vscode.TextDocument) {
 		if (!this._isEnabled || this._running || !this._isRelevantFile(document)) {
 			// TestOnSave is disabled, or we are already running tests, or the file is not relevant.
@@ -97,7 +145,11 @@ class TestOnSave {
 			this._outputChannel.append(e.message);
 		});
 		child.on('exit', code => {
-			code === 0 ? this._statusUpdate('$(testing-passed-icon) Tests') : this._statusUpdate('$(testing-failed-icon) Tests');
+			let statusIcon = '$(question)';
+			if (code !== null) {
+				statusIcon = this._getStatusIconForExitCode(code);
+			}
+			this._statusUpdate(`${statusIcon} Tests`);
 			this._running = false;
 		});
 	}
