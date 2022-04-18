@@ -115,6 +115,7 @@ class TestOnSave {
 		} else if (this._exitCodeError.has(exitCode)) {
 			return '$(testing-error-icon)';
 		} else {
+			this._outputChannel.append(`Unknown exit code: ${exitCode} - cannot determine status icon to display.\n`);
 			return '$(question)';
 		}
 	}
@@ -142,7 +143,10 @@ class TestOnSave {
 			child.stderr.on('data', data => { this._outputChannel.append(data); });
 		}
 		child.on('error', e => {
+			this._outputChannel.append("Error while calling test command:\n");
 			this._outputChannel.append(e.message);
+			this._statusUpdate('$(extensions-warning-message) Tests');
+			this._running = false;
 		});
 		child.on('exit', code => {
 			let statusIcon = '$(question)';
