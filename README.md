@@ -8,6 +8,7 @@ This extension will automatically run them for you when you save a file!
 * Language independent - command to run tests can be set through ``settings.json``
 * Can be enabled/disabled through ``settings.json`` or by clicking the status bar icon
 * Runs discretely in the background - no annoying popups, only red or green status bar icon displaying last test result
+* Exit codes can be mapped to status icons for passing, failed, and errored tests
 
 
 ## Demo
@@ -24,6 +25,9 @@ This extension contributes the following settings:
 * `testOnSave.enabled`: Enable/disable this extension
 * `testOnSave.testCommand`: Command to run tests. Any non-zero exit code is treated as failing tests.
 * `testOnSave.languageId`: Only trigger tests when a file of this language is saved. Set to "any" to always run tests after saving.
+* `testOnSave.exitCodePass`: Exit code(s) that are considered as a passing test suite. Defaults to 0.
+* `testOnSave.exitCodeFail`: Exit code(s) that are considered as a failing test suite. Defaults to non-zero.
+* `testOnSave.exitCodeError`: Exit code(s) that are considered as errors when running the tests. Not used by default.
 
 ## Known Issues
 
